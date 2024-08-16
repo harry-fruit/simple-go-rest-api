@@ -3,26 +3,36 @@ package api
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/harry-fruit/simple-go-rest-api/api/controllers"
+	appTypes "github.com/harry-fruit/simple-go-rest-api/types"
 )
 
 type Server struct {
-	addr string
+	addr        string
+	controllers []appTypes.Controller
+	http.ServeMux
 }
 
 func NewServer(addr string) *Server {
-	return &Server{addr: addr}
+	var userController = controllers.NewUserController("/users")
+
+	return &Server{
+		addr:     addr,
+		ServeMux: *http.NewServeMux(),
+		controllers: []appTypes.Controller{
+			userController.Controller,
+		},
+	}
 }
 
 func (s *Server) Start() error {
 	fmt.Println("Server is starting on ", s.addr)
-	s.startRouters()
-	return http.ListenAndServe(s.addr, nil)
+	return http.ListenAndServe(":8080", &s.ServeMux)
 }
 
-func (s *Server) startRouters() {
-	http.HandleFunc("/", s.handleRoot)
-}
-
-func (s *Server) handleRoot(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Hello, World!")
+func (s *Server) AddControllers() {
+	for _, controller := range s.controllers {
+		controller.SetRoutes(&s.ServeMux)
+	}
 }

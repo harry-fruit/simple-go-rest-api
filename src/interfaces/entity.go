@@ -1,5 +1,5 @@
 package interfaces
 
-type Entity[T any] interface {
-	Get(int) *T
+type Repository[T any] interface {
+	FindById(int) *T
 }

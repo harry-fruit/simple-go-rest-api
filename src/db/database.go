@@ -2,34 +2,57 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	_ "github.com/mattn/go-sqlite3"
 )
 
-func InitDatabase() *sql.DB {
-	var err error
-	database, err := sql.Open("sqlite3", "./mydb.db")
+type SQLDatabase struct {
+	*sql.DB
+}
+
+func NewSQLDatabase(SGBD string) *SQLDatabase {
+	var db *sql.DB
+	var sqlDatabase *SQLDatabase
+
+	switch SGBD {
+	case "sqlite3":
+		db = newSQLiteDatabase()
+	default:
+		log.Fatalf("There's no implementation for the SGBD %s", SGBD)
+	}
+
+	sqlDatabase = &SQLDatabase{db}
+	sqlDatabase.migrate()
+
+	return sqlDatabase
+}
+
+func newSQLiteDatabase() *sql.DB {
+	db, err := sql.Open("sqlite3", "./db/mydb.db")
 
 	if err != nil {
 		log.Fatalf("Error opening database: %v", err)
 	}
 
-	defer database.Close()
+	return db
+}
 
-	statement, err := database.Prepare("CREATE TABLE IF NOT EXISTS people (firstname TEXT, lastname TEXT)")
+func (db *SQLDatabase) migrate() {
+	sqlStmt := `
+	CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		name TEXT,
+		login TEXT,
+		password TEXT
+	);
+	`
+
+	_, err := db.Exec(sqlStmt)
 
 	if err != nil {
-		log.Fatalf("Error preparing SQL statement: %v", err)
+		log.Fatalf("%q: %s\n", err, sqlStmt)
 	}
-
-	defer statement.Close()
-
-	_, err = statement.Exec()
-
-	if err != nil {
-		log.Fatalf("Error executing SQL statement: %v", err)
-	}
-
-	return database
+	fmt.Println("Migration has been executed")
 }
