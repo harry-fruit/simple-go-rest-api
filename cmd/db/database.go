@@ -43,8 +43,8 @@ func (db *SQLDatabase) migrate() {
 	sqlStmt := `
 	CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
-		name TEXT,
-		login TEXT,
+		name TEXT NOT NULL,
+		login TEXT UNIQUE NOT NULL,
 		password TEXT
 	);
 	`
