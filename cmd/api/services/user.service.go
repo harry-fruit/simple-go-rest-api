@@ -58,3 +58,38 @@ func (us *UserService) SetPassword(id int, password string) error {
 
 	return nil
 }
+
+func (us *UserService) Delete(id int) error {
+	user := us.userRepository.FindById(id)
+
+	if user == nil {
+		return fmt.Errorf("user not found")
+	}
+
+	error := us.userRepository.Delete(id)
+
+	if error != nil {
+		return error
+	}
+
+	return nil
+}
+
+func (us *UserService) Update(userPayload map[string]interface{}) (*models.User, error) {
+	userId := userPayload["id"].(int)
+	existentUser := us.userRepository.FindById(userId)
+
+	if existentUser == nil {
+		return nil, fmt.Errorf("user not found")
+	}
+
+	err := us.userRepository.Update(userPayload)
+
+	if err != nil {
+		return nil, err
+	}
+
+	newUser := us.userRepository.FindById(userId)
+
+	return newUser, nil
+}

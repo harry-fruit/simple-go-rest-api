@@ -18,11 +18,11 @@ func NewUserRepository(db *database.SQLDatabase) *UserRepository {
 	return &UserRepository{db: db}
 }
 
-func (u UserRepository) FindById(id int) *models.User {
+func (ur UserRepository) FindById(id int) *models.User {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	rows, err := u.db.QueryContext(ctx, "SELECT id, name, login FROM users WHERE id = ?", id)
+	rows, err := ur.db.QueryContext(ctx, "SELECT id, name, login FROM users WHERE id = ?", id)
 
 	if err != nil {
 		log.Fatal(err)
@@ -45,11 +45,11 @@ func (u UserRepository) FindById(id int) *models.User {
 	return &user
 }
 
-func (u UserRepository) FindByLogin(login string) *models.User {
+func (ur UserRepository) FindByLogin(login string) *models.User {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	rows, err := u.db.QueryContext(ctx, "SELECT id, name, login FROM users WHERE login = ?", login)
+	rows, err := ur.db.QueryContext(ctx, "SELECT id, name, login FROM users WHERE login = ?", login)
 
 	if err != nil {
 		log.Fatal(err)
@@ -72,11 +72,11 @@ func (u UserRepository) FindByLogin(login string) *models.User {
 	return &user
 }
 
-func (u UserRepository) Create(user *models.User) error {
+func (ur UserRepository) Create(user *models.User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := u.db.ExecContext(ctx, "INSERT INTO users (name, login) VALUES (?, ?)", user.Name, user.Login)
+	_, err := ur.db.ExecContext(ctx, "INSERT INTO users (name, login) VALUES (?, ?)", user.Name, user.Login)
 
 	if err != nil {
 		return fmt.Errorf("error creating user: %v", err)
@@ -85,11 +85,11 @@ func (u UserRepository) Create(user *models.User) error {
 	return nil
 }
 
-func (u UserRepository) SetPassword(id int, password string) error {
+func (ur UserRepository) SetPassword(id int, password string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := u.db.ExecContext(ctx, "UPDATE users SET password = ? WHERE id = ?", password, id)
+	_, err := ur.db.ExecContext(ctx, "UPDATE users SET password = ? WHERE id = ?", password, id)
 
 	if err != nil {
 		return fmt.Errorf("error setting password: %v", err)
@@ -98,15 +98,50 @@ func (u UserRepository) SetPassword(id int, password string) error {
 	return nil
 }
 
-// func (u UserRepository) Update() error {
-// 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-// 	defer cancel()
+func (ur UserRepository) Delete(id int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
 
-// 	_, err := u.db.ExecContext(ctx, "UPDATE users SET password = ? WHERE id = ?", password, id)
+	_, err := ur.db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", id)
 
-// 	if err != nil {
-// 		return fmt.Errorf("error setting password: %v", err)
-// 	}
+	if err != nil {
+		return fmt.Errorf("error deleting user: %v", err)
+	}
 
-// 	return nil
-// }
+	return nil
+}
+
+func (u UserRepository) Update(userPayload map[string]interface{}) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	var id int = userPayload["id"].(int)
+	delete(userPayload, "id")
+
+	updateStatement := "UPDATE users "
+	setStatement := "SET "
+	whereStatement := " WHERE id = ?"
+	values := []interface{}{}
+
+	index := 0
+	for key, value := range userPayload {
+		setStatement += key + " = ?"
+
+		if index < len(userPayload)-1 {
+			setStatement += ", "
+		}
+
+		values = append(values, value)
+		index++
+	}
+
+	values = append(values, id)
+
+	_, err := u.db.ExecContext(ctx, updateStatement+setStatement+whereStatement, values...)
+
+	if err != nil {
+		return fmt.Errorf("error setting password: %v", err)
+	}
+
+	return nil
+}
