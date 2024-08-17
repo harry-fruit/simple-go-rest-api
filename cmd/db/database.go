@@ -42,7 +42,7 @@ func newSQLiteDatabase() *sql.DB {
 func (db *SQLDatabase) migrate() {
 	sqlStmt := `
 	CREATE TABLE IF NOT EXISTS users (
-		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
 		name TEXT NOT NULL,
 		login TEXT UNIQUE NOT NULL,
 		password TEXT

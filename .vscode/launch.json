@@ -10,7 +10,6 @@
             "request": "launch",
             "mode": "debug",
             "program": "${workspaceFolder}/cmd",
-            "preLaunchTask": "Run CompileDaemon",
             "env": {},
             "args": []
         }
