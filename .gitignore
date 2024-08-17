@@ -1,2 +1,3 @@
 # remove all debug files
 cmd/__debug_*
+cmd/simple-go-rest-api
