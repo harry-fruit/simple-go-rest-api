@@ -1,0 +1,21 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run CompileDaemon",
+            "type": "shell",
+            "command": "/home/harry/go/bin/CompileDaemon",
+            "args": [
+                "-directory=./cmd"
+            ],
+            "problemMatcher": [
+                "$go"
+            ],
+            "isBackground": true,
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+    ]
+}
