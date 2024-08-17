@@ -6,7 +6,7 @@ import (
 )
 
 type ControllerInterface interface {
-	SetRoutes()
+	Init()
 }
 
 type Controller struct {
@@ -14,7 +14,8 @@ type Controller struct {
 	Routes   []Route
 }
 
-func (c *Controller) SetRoutes(mux *http.ServeMux) {
+func (c *Controller) Init(mux *http.ServeMux) {
+
 	for _, route := range c.Routes {
 		path := fmt.Sprintf("%s %s", route.Method, c.BasePath)
 
