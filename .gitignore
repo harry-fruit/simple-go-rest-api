@@ -1,3 +1,6 @@
 # remove all debug files
 cmd/__debug_*
 cmd/simple-go-rest-api
+
+#remove sqlite db
+cmd/db/*.db
