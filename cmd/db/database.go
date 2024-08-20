@@ -2,7 +2,6 @@ package db
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -37,28 +36,4 @@ func newSQLiteDatabase() *sql.DB {
 	}
 
 	return db
-}
-
-func (db *SQLDatabase) migrate() {
-	sqlStmt := `
-	CREATE TABLE IF NOT EXISTS users (
-		id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
-		name TEXT NOT NULL,
-		login TEXT UNIQUE NOT NULL,
-		password TEXT
-	);
-
-	CREATE TABLE IF NOT EXISTS entities (
-		id INTEGER PRIMARY KEY AUTOINCREMENT UNIQUE NOT NULL,
-		unique_code TEXT UNIQUE NOT NULL,
-		description TEXT
-	);
-	`
-
-	_, err := db.Exec(sqlStmt)
-
-	if err != nil {
-		log.Fatalf("%q: %s\n", err, sqlStmt)
-	}
-	fmt.Println("Migration has been executed")
 }

@@ -31,9 +31,11 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) SetControllers() {
+	fmt.Println("----- Setting controllers... -----")
 	for _, controller := range s.controllers {
 		controller.Init(&s.ServeMux)
 	}
+	fmt.Println("----- Controllers set -----")
 }
 
 func getControllers(db *database.SQLDatabase) []appTypes.Controller {
