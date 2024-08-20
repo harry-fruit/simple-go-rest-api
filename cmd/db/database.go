@@ -11,6 +11,16 @@ type SQLDatabase struct {
 	*sql.DB
 }
 
+func newSQLiteDatabase() *sql.DB {
+	db, err := sql.Open("sqlite3", "./db/mydb.db")
+
+	if err != nil {
+		log.Fatalf("Error opening database: %v", err)
+	}
+
+	return db
+}
+
 func NewSQLDatabase(SGBD string) *SQLDatabase {
 	var db *sql.DB
 	var sqlDatabase *SQLDatabase
@@ -26,14 +36,4 @@ func NewSQLDatabase(SGBD string) *SQLDatabase {
 	sqlDatabase.migrate()
 
 	return sqlDatabase
-}
-
-func newSQLiteDatabase() *sql.DB {
-	db, err := sql.Open("sqlite3", "./db/mydb.db")
-
-	if err != nil {
-		log.Fatalf("Error opening database: %v", err)
-	}
-
-	return db
 }

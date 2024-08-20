@@ -18,6 +18,32 @@ func NewUserRepository(db *database.SQLDatabase) *UserRepository {
 	return &UserRepository{db: db}
 }
 
+func (ur UserRepository) Create(user *models.User) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := ur.db.ExecContext(ctx, "INSERT INTO users (name, login) VALUES (?, ?)", user.Name, user.Login)
+
+	if err != nil {
+		return fmt.Errorf("error creating user: %v", err)
+	}
+
+	return nil
+}
+
+func (ur UserRepository) Delete(id int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := ur.db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", id)
+
+	if err != nil {
+		return fmt.Errorf("error deleting user: %v", err)
+	}
+
+	return nil
+}
+
 func (ur UserRepository) FindById(id int) *models.User {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -72,19 +98,6 @@ func (ur UserRepository) FindByLogin(login string) *models.User {
 	return &user
 }
 
-func (ur UserRepository) Create(user *models.User) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	_, err := ur.db.ExecContext(ctx, "INSERT INTO users (name, login) VALUES (?, ?)", user.Name, user.Login)
-
-	if err != nil {
-		return fmt.Errorf("error creating user: %v", err)
-	}
-
-	return nil
-}
-
 func (ur UserRepository) SetPassword(id int, password string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -93,19 +106,6 @@ func (ur UserRepository) SetPassword(id int, password string) error {
 
 	if err != nil {
 		return fmt.Errorf("error setting password: %v", err)
-	}
-
-	return nil
-}
-
-func (ur UserRepository) Delete(id int) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	_, err := ur.db.ExecContext(ctx, "DELETE FROM users WHERE id = ?", id)
-
-	if err != nil {
-		return fmt.Errorf("error deleting user: %v", err)
 	}
 
 	return nil

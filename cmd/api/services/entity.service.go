@@ -39,10 +39,6 @@ func (es *EntityService) Create(entity *models.Entity) (*models.Entity, error) {
 	return created, nil
 }
 
-func (es *EntityService) FindById(id int) *models.Entity {
-	return es.entityRepository.FindById(id)
-}
-
 func (es *EntityService) Delete(id int) error {
 	entity := es.entityRepository.FindById(id)
 
@@ -57,6 +53,10 @@ func (es *EntityService) Delete(id int) error {
 	}
 
 	return nil
+}
+
+func (es *EntityService) FindById(id int) *models.Entity {
+	return es.entityRepository.FindById(id)
 }
 
 func (es *EntityService) Update(payload map[string]interface{}) (*models.Entity, error) {

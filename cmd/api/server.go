@@ -16,6 +16,16 @@ type Server struct {
 	http.ServeMux
 }
 
+func getControllers(db *database.SQLDatabase) []appTypes.Controller {
+	var userController = controllers.NewUserController("/users", db)
+	var entityController = controllers.NewEntityController("/entities", db)
+
+	return []appTypes.Controller{
+		userController.Controller,
+		entityController.Controller,
+	}
+}
+
 func NewServer(addr string, db *database.SQLDatabase) *Server {
 	return &Server{
 		addr:        addr,
@@ -23,11 +33,6 @@ func NewServer(addr string, db *database.SQLDatabase) *Server {
 		db:          db,
 		controllers: getControllers(db),
 	}
-}
-
-func (s *Server) Start() error {
-	fmt.Println("Server is starting on ", s.addr)
-	return http.ListenAndServe(":8080", &s.ServeMux)
 }
 
 func (s *Server) SetControllers() {
@@ -38,12 +43,7 @@ func (s *Server) SetControllers() {
 	fmt.Println("----- Controllers set -----")
 }
 
-func getControllers(db *database.SQLDatabase) []appTypes.Controller {
-	var userController = controllers.NewUserController("/users", db)
-	var entityController = controllers.NewEntityController("/entities", db)
-
-	return []appTypes.Controller{
-		userController.Controller,
-		entityController.Controller,
-	}
+func (s *Server) Start() error {
+	fmt.Println("Server is starting on ", s.addr)
+	return http.ListenAndServe(":8080", &s.ServeMux)
 }

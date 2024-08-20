@@ -7,22 +7,6 @@ type MigrationTable struct {
 	SQLStmt string
 }
 
-func (db *SQLDatabase) migrate() {
-	fmt.Println("----- Migrating database... -----")
-	tables := getTables()
-
-	for _, table := range tables {
-		_, err := db.Exec(table.SQLStmt)
-
-		if err != nil {
-			panic(err)
-		}
-
-		fmt.Printf("Table '%s' created\n", table.Name)
-	}
-	fmt.Println("----- Database migrated -----")
-}
-
 func getTables() []MigrationTable {
 	var tables = []MigrationTable{
 		{
@@ -45,4 +29,20 @@ func getTables() []MigrationTable {
 	}
 
 	return tables
+}
+
+func (db *SQLDatabase) migrate() {
+	fmt.Println("----- Migrating database... -----")
+	tables := getTables()
+
+	for _, table := range tables {
+		_, err := db.Exec(table.SQLStmt)
+
+		if err != nil {
+			panic(err)
+		}
+
+		fmt.Printf("Table '%s' created\n", table.Name)
+	}
+	fmt.Println("----- Database migrated -----")
 }

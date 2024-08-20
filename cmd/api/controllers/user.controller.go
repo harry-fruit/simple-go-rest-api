@@ -13,12 +13,15 @@ import (
 
 type UserController struct {
 	types.Controller
-	db *database.SQLDatabase
+	db          *database.SQLDatabase
+	userService *services.UserService
 }
 
 func NewUserController(basePath string, db *database.SQLDatabase) *UserController {
+
 	userController := &UserController{
-		db: db,
+		db:          db,
+		userService: services.NewUserService(db),
 		Controller: types.Controller{
 			BasePath: basePath,
 		},
@@ -29,21 +32,14 @@ func NewUserController(basePath string, db *database.SQLDatabase) *UserControlle
 	return userController
 }
 
-func (uc *UserController) FindById(w http.ResponseWriter, r *http.Request) {
-	userService := services.NewUserService(uc.db)
-
-	idInString := r.PathValue("id")
-	id, err := strconv.Atoi(idInString)
-
-	//TODO: Refact -- Validate input
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid ID"))
-		return
+func (uc *UserController) setRoutes() {
+	uc.Routes = []types.Route{
+		{Method: "GET", Path: "/{id}", Handler: uc.FindById},
+		{Method: "POST", Path: "/", Handler: uc.Create},
+		{Method: "POST", Path: "/{id}/set-password", Handler: uc.SetPassword},
+		{Method: "DELETE", Path: "/{id}", Handler: uc.Delete},
+		{Method: "PATCH", Path: "/{id}", Handler: uc.Update},
 	}
-
-	user := userService.FindById(id)
-	json.NewEncoder(w).Encode(user)
 }
 
 func (uc *UserController) Create(w http.ResponseWriter, r *http.Request) {
@@ -56,9 +52,7 @@ func (uc *UserController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	userService := services.NewUserService(uc.db)
-
-	user, error := userService.Create(&newUser)
+	user, error := uc.userService.Create(&newUser)
 
 	if error != nil {
 		http.Error(w, error.Error(), http.StatusBadRequest) //TODO: Tratar tipos de erros diferentes
@@ -68,9 +62,44 @@ func (uc *UserController) Create(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(user)
 }
 
-func (uc *UserController) SetPassword(w http.ResponseWriter, r *http.Request) {
-	userService := services.NewUserService(uc.db)
+func (uc *UserController) Delete(w http.ResponseWriter, r *http.Request) {
+	idInString := r.PathValue("id")
+	id, err := strconv.Atoi(idInString)
 
+	//TODO: Refact -- Validate input
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid ID"))
+		return
+	}
+
+	err = uc.userService.Delete(id)
+
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (uc *UserController) FindById(w http.ResponseWriter, r *http.Request) {
+
+	idInString := r.PathValue("id")
+	id, err := strconv.Atoi(idInString)
+
+	//TODO: Refact -- Validate input
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid ID"))
+		return
+	}
+
+	user := uc.userService.FindById(id)
+	json.NewEncoder(w).Encode(user)
+}
+
+func (uc *UserController) SetPassword(w http.ResponseWriter, r *http.Request) {
 	idInString := r.PathValue("id")
 	id, err := strconv.Atoi(idInString)
 
@@ -97,30 +126,7 @@ func (uc *UserController) SetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = userService.SetPassword(id, password)
-
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	w.WriteHeader(http.StatusNoContent)
-}
-
-func (uc *UserController) Delete(w http.ResponseWriter, r *http.Request) {
-	userService := services.NewUserService(uc.db)
-
-	idInString := r.PathValue("id")
-	id, err := strconv.Atoi(idInString)
-
-	//TODO: Refact -- Validate input
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid ID"))
-		return
-	}
-
-	err = userService.Delete(id)
+	err = uc.userService.SetPassword(id, password)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -131,8 +137,6 @@ func (uc *UserController) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (uc *UserController) Update(w http.ResponseWriter, r *http.Request) {
-	userService := services.NewUserService(uc.db)
-
 	idInString := r.PathValue("id")
 	id, err := strconv.Atoi(idInString)
 
@@ -167,7 +171,7 @@ func (uc *UserController) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	payload["id"] = id
-	user, err := userService.Update(payload)
+	user, err := uc.userService.Update(payload)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -175,14 +179,4 @@ func (uc *UserController) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(user)
-}
-
-func (uc *UserController) setRoutes() {
-	uc.Routes = []types.Route{
-		{Method: "GET", Path: "/{id}", Handler: uc.FindById},
-		{Method: "POST", Path: "/", Handler: uc.Create},
-		{Method: "POST", Path: "/{id}/set-password", Handler: uc.SetPassword},
-		{Method: "DELETE", Path: "/{id}", Handler: uc.Delete},
-		{Method: "PATCH", Path: "/{id}", Handler: uc.Update},
-	}
 }

@@ -18,6 +18,32 @@ func NewEntityRepository(db *database.SQLDatabase) *EntityRepository {
 	return &EntityRepository{db: db}
 }
 
+func (er EntityRepository) Create(entity *models.Entity) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := er.db.ExecContext(ctx, "INSERT INTO entities (unique_code, description) VALUES (?, ?)", entity.UniqueCode, entity.Description)
+
+	if err != nil {
+		return fmt.Errorf("error creating entity: %v", err)
+	}
+
+	return nil
+}
+
+func (er EntityRepository) Delete(id int) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	_, err := er.db.ExecContext(ctx, "DELETE FROM entities WHERE id = ?", id)
+
+	if err != nil {
+		return fmt.Errorf("error deleting entity: %v", err)
+	}
+
+	return nil
+}
+
 func (er EntityRepository) FindById(id int) *models.Entity {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -70,32 +96,6 @@ func (er EntityRepository) FindByUniqueCode(uniqueCode string) *models.Entity {
 	}
 
 	return &entity
-}
-
-func (er EntityRepository) Create(entity *models.Entity) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	_, err := er.db.ExecContext(ctx, "INSERT INTO entities (unique_code, description) VALUES (?, ?)", entity.UniqueCode, entity.Description)
-
-	if err != nil {
-		return fmt.Errorf("error creating entity: %v", err)
-	}
-
-	return nil
-}
-
-func (er EntityRepository) Delete(id int) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	_, err := er.db.ExecContext(ctx, "DELETE FROM entities WHERE id = ?", id)
-
-	if err != nil {
-		return fmt.Errorf("error deleting entity: %v", err)
-	}
-
-	return nil
 }
 
 func (er EntityRepository) Update(payload map[string]interface{}) error {

@@ -13,12 +13,14 @@ import (
 
 type EntityController struct {
 	types.Controller
-	db *database.SQLDatabase
+	db            *database.SQLDatabase
+	entityService *services.EntityService
 }
 
 func NewEntityController(basePath string, db *database.SQLDatabase) *EntityController {
 	entityController := &EntityController{
-		db: db,
+		db:            db,
+		entityService: services.NewEntityService(db),
 		Controller: types.Controller{
 			BasePath: basePath,
 		},
@@ -27,6 +29,15 @@ func NewEntityController(basePath string, db *database.SQLDatabase) *EntityContr
 	entityController.setRoutes()
 
 	return entityController
+}
+
+func (ec *EntityController) setRoutes() {
+	ec.Routes = []types.Route{
+		{Method: "GET", Path: "/{id}", Handler: ec.FindById},
+		{Method: "POST", Path: "/", Handler: ec.Create},
+		{Method: "DELETE", Path: "/{id}", Handler: ec.Delete},
+		{Method: "PATCH", Path: "/{id}", Handler: ec.Update},
+	}
 }
 
 func (ec *EntityController) Create(w http.ResponseWriter, r *http.Request) {
@@ -44,8 +55,7 @@ func (ec *EntityController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	entityService := services.NewEntityService(ec.db)
-	entity, err := entityService.Create(&newEntity)
+	entity, err := ec.entityService.Create(&newEntity)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest) //TODO: Tratar tipos de erros diferentes
@@ -53,12 +63,9 @@ func (ec *EntityController) Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(entity)
-
 }
 
 func (ec *EntityController) Delete(w http.ResponseWriter, r *http.Request) {
-	entityService := services.NewEntityService(ec.db)
-
 	idInString := r.PathValue("id")
 	id, err := strconv.Atoi(idInString)
 
@@ -69,7 +76,7 @@ func (ec *EntityController) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = entityService.Delete(id)
+	err = ec.entityService.Delete(id)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -79,9 +86,22 @@ func (ec *EntityController) Delete(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (ec *EntityController) Update(w http.ResponseWriter, r *http.Request) {
-	entityService := services.NewEntityService(ec.db)
+func (ec *EntityController) FindById(w http.ResponseWriter, r *http.Request) {
+	idInString := r.PathValue("id")
+	id, err := strconv.Atoi(idInString)
 
+	//TODO: Refact -- Validate input
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write([]byte("Invalid ID"))
+		return
+	}
+
+	entity := ec.entityService.FindById(id)
+	json.NewEncoder(w).Encode(entity)
+}
+
+func (ec *EntityController) Update(w http.ResponseWriter, r *http.Request) {
 	idInString := r.PathValue("id")
 	id, err := strconv.Atoi(idInString)
 
@@ -116,7 +136,7 @@ func (ec *EntityController) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	payload["id"] = id
-	entity, err := entityService.Update(payload)
+	entity, err := ec.entityService.Update(payload)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -124,30 +144,4 @@ func (ec *EntityController) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(entity)
-}
-
-func (ec *EntityController) FindById(w http.ResponseWriter, r *http.Request) {
-	entityService := services.NewEntityService(ec.db)
-
-	idInString := r.PathValue("id")
-	id, err := strconv.Atoi(idInString)
-
-	//TODO: Refact -- Validate input
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid ID"))
-		return
-	}
-
-	entity := entityService.FindById(id)
-	json.NewEncoder(w).Encode(entity)
-}
-
-func (ec *EntityController) setRoutes() {
-	ec.Routes = []types.Route{
-		{Method: "GET", Path: "/{id}", Handler: ec.FindById},
-		{Method: "POST", Path: "/", Handler: ec.Create},
-		{Method: "DELETE", Path: "/{id}", Handler: ec.Delete},
-		{Method: "PATCH", Path: "/{id}", Handler: ec.Update},
-	}
 }

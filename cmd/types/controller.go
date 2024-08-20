@@ -5,13 +5,13 @@ import (
 	"net/http"
 )
 
-type ControllerInterface interface {
-	Init()
-}
-
 type Controller struct {
 	BasePath string
 	Routes   []Route
+}
+
+type ControllerInterface interface {
+	Init()
 }
 
 func (c *Controller) Init(mux *http.ServeMux) {
