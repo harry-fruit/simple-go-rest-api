@@ -98,6 +98,12 @@ func (ec *EntityController) FindById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	entity := ec.entityService.FindById(id)
+
+	if entity == nil {
+		http.Error(w, "entity not found", http.StatusNotFound)
+		return
+	}
+
 	json.NewEncoder(w).Encode(entity)
 }
 

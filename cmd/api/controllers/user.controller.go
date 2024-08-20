@@ -96,6 +96,12 @@ func (uc *UserController) FindById(w http.ResponseWriter, r *http.Request) {
 	}
 
 	user := uc.userService.FindById(id)
+
+	if user == nil {
+		http.Error(w, "user not found", http.StatusNotFound)
+		return
+	}
+
 	json.NewEncoder(w).Encode(user)
 }
 
