@@ -17,15 +17,11 @@ type Server struct {
 }
 
 func NewServer(addr string, db *database.SQLDatabase) *Server {
-	var userController = controllers.NewUserController("/users", db)
-
 	return &Server{
-		addr:     addr,
-		ServeMux: *http.NewServeMux(),
-		db:       db,
-		controllers: []appTypes.Controller{
-			userController.Controller,
-		},
+		addr:        addr,
+		ServeMux:    *http.NewServeMux(),
+		db:          db,
+		controllers: getControllers(db),
 	}
 }
 
@@ -37,5 +33,15 @@ func (s *Server) Start() error {
 func (s *Server) SetControllers() {
 	for _, controller := range s.controllers {
 		controller.Init(&s.ServeMux)
+	}
+}
+
+func getControllers(db *database.SQLDatabase) []appTypes.Controller {
+	var userController = controllers.NewUserController("/users", db)
+	var entityController = controllers.NewEntityController("/entities", db)
+
+	return []appTypes.Controller{
+		userController.Controller,
+		entityController.Controller,
 	}
 }
