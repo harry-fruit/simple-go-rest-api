@@ -140,7 +140,7 @@ func (u UserRepository) Update(userPayload map[string]interface{}) error {
 	_, err := u.db.ExecContext(ctx, updateStatement+setStatement+whereStatement, values...)
 
 	if err != nil {
-		return fmt.Errorf("error setting password: %v", err)
+		return fmt.Errorf("error while updating user: %v", err)
 	}
 
 	return nil
