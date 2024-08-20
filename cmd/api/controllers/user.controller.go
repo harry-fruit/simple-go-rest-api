@@ -9,6 +9,7 @@ import (
 	database "github.com/harry-fruit/simple-go-rest-api/db"
 	"github.com/harry-fruit/simple-go-rest-api/models"
 	"github.com/harry-fruit/simple-go-rest-api/types"
+	response "github.com/harry-fruit/simple-go-rest-api/utils/http"
 )
 
 type UserController struct {
@@ -91,19 +92,36 @@ func (uc *UserController) FindById(w http.ResponseWriter, r *http.Request) {
 
 	//TODO: Refact -- Validate input
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid ID"))
+		httpResponse := &response.HTTPResponse{
+			StatusCode: http.StatusBadRequest,
+			Message:    "invalid id",
+			Data:       nil,
+		}
+
+		httpResponse.Send(w)
 		return
 	}
 
 	user := uc.userService.FindById(id)
 
 	if user == nil {
-		http.Error(w, "user not found", http.StatusNotFound)
+		httpResponse := &response.HTTPResponse{
+			StatusCode: http.StatusNotFound,
+			Message:    "user not found",
+			Data:       nil,
+		}
+
+		httpResponse.Send(w)
 		return
 	}
 
-	json.NewEncoder(w).Encode(user)
+	httpResponse := &response.HTTPResponse{
+		StatusCode: http.StatusOK,
+		Message:    "user found",
+		Data:       user,
+	}
+
+	httpResponse.Send(w)
 }
 
 func (uc *UserController) SetPassword(w http.ResponseWriter, r *http.Request) {
@@ -112,8 +130,13 @@ func (uc *UserController) SetPassword(w http.ResponseWriter, r *http.Request) {
 
 	//TODO: Refact -- Validate input
 	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Invalid ID"))
+		httpResponse := &response.HTTPResponse{
+			StatusCode: http.StatusBadRequest,
+			Message:    "invalid id",
+			Data:       nil,
+		}
+
+		httpResponse.Send(w)
 		return
 	}
 
@@ -122,25 +145,47 @@ func (uc *UserController) SetPassword(w http.ResponseWriter, r *http.Request) {
 	err = decoder.Decode(&payload)
 
 	if err != nil {
-		http.Error(w, "Bad request", http.StatusBadRequest)
+		httpResponse := &response.HTTPResponse{
+			StatusCode: http.StatusBadRequest,
+			Message:    "bad request",
+			Data:       nil,
+		}
+
+		httpResponse.Send(w)
 		return
 	}
 
 	password, ok := payload["password"].(string)
 
 	if !ok {
-		http.Error(w, "Invalid or missing password", http.StatusBadRequest)
+		httpResponse := &response.HTTPResponse{
+			StatusCode: http.StatusBadRequest,
+			Message:    "invalid or missing password",
+			Data:       nil,
+		}
+
+		httpResponse.Send(w)
 		return
 	}
 
 	err = uc.userService.SetPassword(id, password)
 
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		httpResponse := &response.HTTPResponse{
+			StatusCode: http.StatusInternalServerError,
+			Message:    "internal server error",
+			Data:       nil,
+		}
+
+		httpResponse.Send(w)
 		return
 	}
 
-	w.WriteHeader(http.StatusNoContent)
+	httpResponse := &response.HTTPResponse{
+		StatusCode: http.StatusNoContent,
+	}
+
+	httpResponse.Send(w)
 }
 
 func (uc *UserController) Update(w http.ResponseWriter, r *http.Request) {
