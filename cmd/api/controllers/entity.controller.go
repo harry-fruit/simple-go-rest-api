@@ -62,6 +62,7 @@ func (ec *EntityController) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(entity)
 }
 
