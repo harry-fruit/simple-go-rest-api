@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	"github.com/harry-fruit/simple-go-rest-api/api"
 	database "github.com/harry-fruit/simple-go-rest-api/db"
+	api "github.com/harry-fruit/simple-go-rest-api/internal"
 )
 
 func main() {

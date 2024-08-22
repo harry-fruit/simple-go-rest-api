@@ -3,9 +3,9 @@ package services
 import (
 	"fmt"
 
-	"github.com/harry-fruit/simple-go-rest-api/api/repositories"
 	database "github.com/harry-fruit/simple-go-rest-api/db"
-	"github.com/harry-fruit/simple-go-rest-api/models"
+	"github.com/harry-fruit/simple-go-rest-api/internal/models"
+	"github.com/harry-fruit/simple-go-rest-api/internal/repositories"
 )
 
 type EntityService struct {

@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/harry-fruit/simple-go-rest-api/api/services"
 	database "github.com/harry-fruit/simple-go-rest-api/db"
-	"github.com/harry-fruit/simple-go-rest-api/models"
-	"github.com/harry-fruit/simple-go-rest-api/types"
-	response "github.com/harry-fruit/simple-go-rest-api/utils/http"
+	"github.com/harry-fruit/simple-go-rest-api/internal/models"
+	"github.com/harry-fruit/simple-go-rest-api/internal/services"
+	"github.com/harry-fruit/simple-go-rest-api/internal/types"
+	response "github.com/harry-fruit/simple-go-rest-api/internal/types/http"
 )
 
 type UserController struct {

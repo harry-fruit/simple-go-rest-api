@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/harry-fruit/simple-go-rest-api/api/services"
 	database "github.com/harry-fruit/simple-go-rest-api/db"
-	"github.com/harry-fruit/simple-go-rest-api/models"
-	"github.com/harry-fruit/simple-go-rest-api/types"
+	"github.com/harry-fruit/simple-go-rest-api/internal/models"
+	"github.com/harry-fruit/simple-go-rest-api/internal/services"
+	"github.com/harry-fruit/simple-go-rest-api/internal/types"
 )
 
 type EntityController struct {

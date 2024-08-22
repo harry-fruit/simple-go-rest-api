@@ -12,7 +12,7 @@ type SQLDatabase struct {
 }
 
 func newSQLiteDatabase() *sql.DB {
-	db, err := sql.Open("sqlite3", "./db/mydb.db")
+	db, err := sql.Open("sqlite3", "../db/db.db")
 
 	if err != nil {
 		log.Fatalf("Error opening database: %v", err)

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	database "github.com/harry-fruit/simple-go-rest-api/db"
-	"github.com/harry-fruit/simple-go-rest-api/models"
+	"github.com/harry-fruit/simple-go-rest-api/internal/models"
 )
 
 type UserRepository struct {

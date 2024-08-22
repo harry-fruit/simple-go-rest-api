@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/harry-fruit/simple-go-rest-api/api/controllers"
 	database "github.com/harry-fruit/simple-go-rest-api/db"
-	appTypes "github.com/harry-fruit/simple-go-rest-api/types"
+	"github.com/harry-fruit/simple-go-rest-api/internal/controllers"
+	appTypes "github.com/harry-fruit/simple-go-rest-api/internal/types"
 )
 
 type Server struct {
