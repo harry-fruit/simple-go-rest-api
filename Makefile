@@ -37,10 +37,20 @@ install:
 
 
 # migrate: Run the database migrations
-db-migrate:
+db-migrate-up:
 	@echo "Running database migrations..."
 	@goose -dir .$(MIGRATIONS_PATH) sqlite3 $(CURRENT_DIR)/db/db.db up
 	@echo "Database migrations completed"
+
+db-migrate-down:
+	@echo "Dropping database last migration..."
+	@goose -dir .$(MIGRATIONS_PATH) sqlite3 $(CURRENT_DIR)/db/db.db down
+	@echo "Migration dropped"
+
+db-migrate-reset:
+	@echo "Reset database migrations..."
+	@goose -dir .$(MIGRATIONS_PATH) sqlite3 $(CURRENT_DIR)/db/db.db reset
+	@echo "Database migrations reset"
 
 db-create-migration:
 	@if [ -z "$(MIGRATION_NAME)" ]; then \
@@ -52,7 +62,7 @@ db-create-migration:
 
 db-seed:
 	@echo "Seeding db..."
-	@goose -dir .$(SEEDS_PATH) sqlite3 $(CURRENT_DIR)/db/db.db up
+	@goose -dir .$(SEEDS_PATH) -no-versioning sqlite3 $(CURRENT_DIR)/db/db.db up
 	@echo "Seeding completed"
 
 db-create-seed:
