@@ -33,7 +33,6 @@ func NewSQLDatabase(SGBD string) *SQLDatabase {
 	}
 
 	sqlDatabase = &SQLDatabase{db}
-	sqlDatabase.migrate()
 
 	return sqlDatabase
 }
