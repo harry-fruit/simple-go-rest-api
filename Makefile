@@ -6,6 +6,7 @@ CMD_PATH=./cmd
 VERSION=1.0.0
 CURRENT_DIR=$(shell pwd)
 MIGRATIONS_PATH=/db/migrations
+SEEDS_PATH=/db/seeds
 #Colors
 C_RED=\033[0;31m
 END_COLOR=\e[0m
@@ -38,7 +39,7 @@ install:
 # migrate: Run the database migrations
 db-migrate:
 	@echo "Running database migrations..."
-	@goose -dir $(MIGRATIONS_PATH) sqlite3 $(CURRENT_DIR)/db/db.db up
+	@goose -dir .$(MIGRATIONS_PATH) sqlite3 $(CURRENT_DIR)/db/db.db up
 	@echo "Database migrations completed"
 
 db-create-migration:
@@ -48,3 +49,16 @@ db-create-migration:
 	fi
 	@echo "Creating migration: $(MIGRATION_NAME)"
 	@goose -dir $(CURRENT_DIR)$(MIGRATIONS_PATH) create $(MIGRATION_NAME) sql
+
+db-seed:
+	@echo "Seeding db..."
+	@goose -dir .$(SEEDS_PATH) sqlite3 $(CURRENT_DIR)/db/db.db up
+	@echo "Seeding completed"
+
+db-create-seed:
+	@if [ -z "$(SEED_NAME)" ]; then \
+		echo "Please provide a seed name"; \
+		exit 1; \
+	fi
+	@echo "Creating seed: $(SEED_NAME)"
+	@goose -dir $(CURRENT_DIR)$(SEEDS_PATH) create $(SEED_NAME) sql

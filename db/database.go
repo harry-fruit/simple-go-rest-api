@@ -34,5 +34,7 @@ func NewSQLDatabase(SGBD string) *SQLDatabase {
 
 	sqlDatabase = &SQLDatabase{db}
 
+	db.Exec("SELECT 1=1")
+
 	return sqlDatabase
 }
