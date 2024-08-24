@@ -1,2 +1,5 @@
 #remove sqlite db
 db/*.db
+
+#Remove compiled files
+bin/*
