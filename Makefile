@@ -72,3 +72,8 @@ db-create-seed:
 	fi
 	@echo "Creating seed: $(SEED_NAME)"
 	@goose -dir $(CURRENT_DIR)$(SEEDS_PATH) create $(SEED_NAME) sql
+
+swag-compile:
+	@echo "Compiling swagger docs..."
+	@swag init --dir ./cmd --output ./api
+	@echo "Swagger docs compiled"
