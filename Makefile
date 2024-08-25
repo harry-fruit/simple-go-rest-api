@@ -75,5 +75,5 @@ db-create-seed:
 
 swag-compile:
 	@echo "Compiling swagger docs..."
-	@swag init --dir ./cmd --output ./api
+	@swag init -g ./cmd/main.go --dir ./ --output ./api
 	@echo "Swagger docs compiled"

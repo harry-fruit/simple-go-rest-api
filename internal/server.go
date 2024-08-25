@@ -4,16 +4,19 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/gorilla/mux"
+	_ "github.com/harry-fruit/simple-go-rest-api/api"
 	database "github.com/harry-fruit/simple-go-rest-api/db"
 	"github.com/harry-fruit/simple-go-rest-api/internal/controllers"
 	appTypes "github.com/harry-fruit/simple-go-rest-api/internal/types"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 type Server struct {
 	addr        string
 	controllers []appTypes.Controller
 	db          *database.SQLDatabase
-	http.ServeMux
+	*mux.Router
 }
 
 func getControllers(db *database.SQLDatabase) []appTypes.Controller {
@@ -27,23 +30,30 @@ func getControllers(db *database.SQLDatabase) []appTypes.Controller {
 }
 
 func NewServer(addr string, db *database.SQLDatabase) *Server {
+	mux := mux.NewRouter()
+
 	return &Server{
 		addr:        addr,
-		ServeMux:    *http.NewServeMux(),
+		Router:      mux,
 		db:          db,
 		controllers: getControllers(db),
 	}
 }
 
-func (s *Server) SetControllers() {
+func (s *Server) setControllers() {
 	fmt.Println("----- Setting controllers... -----")
+
 	for _, controller := range s.controllers {
-		controller.Init(&s.ServeMux)
+		controller.SetRoutes(s.Router)
 	}
+
+	s.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+
 	fmt.Println("----- Controllers set -----")
 }
 
 func (s *Server) Start() error {
 	fmt.Println("Server is starting on ", s.addr)
-	return http.ListenAndServe(":8080", &s.ServeMux)
+	s.setControllers()
+	return http.ListenAndServe(":8080", s.Router)
 }

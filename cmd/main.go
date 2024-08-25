@@ -11,7 +11,5 @@ func main() {
 	db := database.NewSQLDatabase("sqlite3")
 	server := api.NewServer(":8080", db)
 
-	server.SetControllers()
-
 	log.Fatal(server.Start())
 }

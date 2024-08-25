@@ -3,6 +3,8 @@ package types
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/gorilla/mux"
 )
 
 type Controller struct {
@@ -14,16 +16,11 @@ type ControllerInterface interface {
 	Init()
 }
 
-func (c *Controller) Init(mux *http.ServeMux) {
+func (c *Controller) SetRoutes(mux *mux.Router) {
 
 	for _, route := range c.Routes {
-		path := fmt.Sprintf("%s %s", route.Method, c.BasePath)
-
-		if route.Path != "" {
-			path += route.Path
-		}
-
-		mux.HandleFunc(path, route.Handler)
+		path := c.BasePath + route.Path
+		mux.Handle(path, http.HandlerFunc(route.Handler)).Methods(route.Method)
 		fmt.Println("Route added: ", path)
 	}
 }

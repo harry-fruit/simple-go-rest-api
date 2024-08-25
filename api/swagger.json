@@ -1,0 +1,36 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {}
+    },
+    "paths": {
+        "/user/": {
+            "post": {
+                "description": "Returns a test message",
+                "summary": "Get CREATE USER",
+                "responses": {
+                    "200": {
+                        "description": "hello world",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/user/{id}": {
+            "delete": {
+                "description": "Returns a test message",
+                "summary": "Get DELETE USER",
+                "responses": {
+                    "200": {
+                        "description": "hello world",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
