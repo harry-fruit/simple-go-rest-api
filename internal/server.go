@@ -7,7 +7,8 @@ import (
 	"github.com/gorilla/mux"
 	_ "github.com/harry-fruit/simple-go-rest-api/api"
 	database "github.com/harry-fruit/simple-go-rest-api/db"
-	"github.com/harry-fruit/simple-go-rest-api/internal/controllers"
+	entitiesController "github.com/harry-fruit/simple-go-rest-api/internal/controllers/entities"
+	usersController "github.com/harry-fruit/simple-go-rest-api/internal/controllers/users"
 	appTypes "github.com/harry-fruit/simple-go-rest-api/internal/types"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
@@ -20,8 +21,8 @@ type Server struct {
 }
 
 func getControllers(db *database.SQLDatabase) []appTypes.Controller {
-	var userController = controllers.NewUserController("/users", db)
-	var entityController = controllers.NewEntityController("/entities", db)
+	var userController = usersController.NewUserController("/users", db)
+	var entityController = entitiesController.NewEntityController("/entities", db)
 
 	return []appTypes.Controller{
 		userController.Controller,

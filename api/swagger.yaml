@@ -1,22 +1,244 @@
+definitions:
+  dtos.SetUserPasswordPayloadDTO:
+    properties:
+      password:
+        type: string
+    type: object
+  dtos.UserPayloadDTO:
+    properties:
+      id_role:
+        type: integer
+      id_status:
+        type: integer
+      login:
+        type: string
+      name:
+        type: string
+    type: object
+  models.User:
+    properties:
+      id:
+        type: integer
+      id_role:
+        type: integer
+      id_status:
+        type: integer
+      login:
+        type: string
+      name:
+        type: string
+    type: object
+  response.HTTPResponse:
+    properties:
+      data: {}
+      message:
+        type: string
+      status_code:
+        type: integer
+    type: object
 info:
   contact: {}
 paths:
-  /user/:
+  /users/:
     post:
-      description: Returns a test message
+      consumes:
+      - application/json
+      description: Create a new user then return it
+      parameters:
+      - description: user payload
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserPayloadDTO'
+      produces:
+      - application/json
       responses:
-        "200":
-          description: hello world
+        "201":
+          description: user created
           schema:
-            type: string
-      summary: Get CREATE USER
-  /user/{id}:
+            allOf:
+            - $ref: '#/definitions/response.HTTPResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: bad request
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPResponse'
+            - properties:
+                data:
+                  type: object
+              type: object
+      summary: Create a new user
+      tags:
+      - Users
+  /users/{id}:
     delete:
-      description: Returns a test message
+      description: Delete user by ID
+      parameters:
+      - description: user's id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: user deleted
+        "400":
+          description: bad request
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPResponse'
+            - properties:
+                data:
+                  type: object
+              type: object
+        "404":
+          description: user not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPResponse'
+            - properties:
+                data:
+                  type: object
+              type: object
+      summary: Delete user
+      tags:
+      - Users
+    get:
+      description: Find user by ID
+      parameters:
+      - description: user's id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
       responses:
         "200":
-          description: hello world
+          description: user found
           schema:
-            type: string
-      summary: Get DELETE USER
+            allOf:
+            - $ref: '#/definitions/response.HTTPResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: bad request
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPResponse'
+            - properties:
+                data:
+                  type: object
+              type: object
+        "404":
+          description: user not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPResponse'
+            - properties:
+                data:
+                  type: object
+              type: object
+      summary: Find user
+      tags:
+      - Users
+    patch:
+      consumes:
+      - application/json
+      description: Update user then return it
+      parameters:
+      - description: user's id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: user payload
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.UserPayloadDTO'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: user updated
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPResponse'
+            - properties:
+                data:
+                  $ref: '#/definitions/models.User'
+              type: object
+        "400":
+          description: bad request
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPResponse'
+            - properties:
+                data:
+                  type: object
+              type: object
+        "404":
+          description: user not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPResponse'
+            - properties:
+                data:
+                  type: object
+              type: object
+      summary: Update user
+      tags:
+      - Users
+  /users/{id}/set-password:
+    post:
+      description: Set user's password by ID
+      parameters:
+      - description: user's id
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: user's password
+        in: body
+        name: password
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.SetUserPasswordPayloadDTO'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: user's password set
+        "400":
+          description: bad request
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPResponse'
+            - properties:
+                data:
+                  type: object
+              type: object
+        "404":
+          description: user not found
+          schema:
+            allOf:
+            - $ref: '#/definitions/response.HTTPResponse'
+            - properties:
+                data:
+                  type: object
+              type: object
+      summary: Set user's password
+      tags:
+      - Users
 swagger: "2.0"

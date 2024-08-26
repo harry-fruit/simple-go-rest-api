@@ -14,6 +14,7 @@ type Controller struct {
 
 type ControllerInterface interface {
 	Init()
+	getHandlers() []Route
 }
 
 func (c *Controller) SetRoutes(mux *mux.Router) {
@@ -23,4 +24,5 @@ func (c *Controller) SetRoutes(mux *mux.Router) {
 		mux.Handle(path, http.HandlerFunc(route.Handler)).Methods(route.Method)
 		fmt.Println("Route added: ", path)
 	}
+
 }

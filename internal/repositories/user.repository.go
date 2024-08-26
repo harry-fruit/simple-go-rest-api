@@ -7,6 +7,7 @@ import (
 	"time"
 
 	database "github.com/harry-fruit/simple-go-rest-api/db"
+	"github.com/harry-fruit/simple-go-rest-api/internal/dtos"
 	"github.com/harry-fruit/simple-go-rest-api/internal/models"
 )
 
@@ -18,11 +19,11 @@ func NewUserRepository(db *database.SQLDatabase) *UserRepository {
 	return &UserRepository{db: db}
 }
 
-func (ur UserRepository) Create(user *models.User) error {
+func (ur UserRepository) Create(userPayload *dtos.UserPayloadDTO) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	_, err := ur.db.ExecContext(ctx, "INSERT INTO users (name, login) VALUES (?, ?)", user.Name, user.Login)
+	_, err := ur.db.ExecContext(ctx, "INSERT INTO users (id_status, id_role, name, login) VALUES (?, ?, ?, ?)", userPayload.IdStatus, userPayload.IdRole, userPayload.Name, userPayload.Login)
 
 	if err != nil {
 		return fmt.Errorf("error creating user: %v", err)
@@ -48,7 +49,7 @@ func (ur UserRepository) FindById(id int) *models.User {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	rows, err := ur.db.QueryContext(ctx, "SELECT id, name, login FROM users WHERE id = ?", id)
+	rows, err := ur.db.QueryContext(ctx, "SELECT id, id_status, id_role, name, login FROM users WHERE id = ?", id)
 
 	if err != nil {
 		log.Fatal(err)
@@ -59,7 +60,7 @@ func (ur UserRepository) FindById(id int) *models.User {
 	var user models.User
 
 	if rows.Next() {
-		err := rows.Scan(&user.ID, &user.Name, &user.Login)
+		err := rows.Scan(&user.ID, &user.IdStatus, &user.IdRole, &user.Name, &user.Login)
 
 		if err != nil {
 			log.Fatal(err)
@@ -75,7 +76,7 @@ func (ur UserRepository) FindByLogin(login string) *models.User {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	rows, err := ur.db.QueryContext(ctx, "SELECT id, name, login FROM users WHERE login = ?", login)
+	rows, err := ur.db.QueryContext(ctx, "SELECT id, id_status, id_role, name, login FROM users WHERE login = ?", login)
 
 	if err != nil {
 		log.Fatal(err)
@@ -86,7 +87,7 @@ func (ur UserRepository) FindByLogin(login string) *models.User {
 	var user models.User
 
 	if rows.Next() {
-		err := rows.Scan(&user.ID, &user.Name, &user.Login)
+		err := rows.Scan(&user.ID, &user.IdStatus, &user.IdRole, &user.Name, &user.Login)
 
 		if err != nil {
 			log.Fatal(err)

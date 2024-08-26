@@ -6,9 +6,10 @@ import (
 )
 
 type HTTPResponse struct {
-	Data       interface{} `json:"data"`
-	StatusCode int         `json:"status_code"`
-	Message    string      `json:"message"`
+	Data        interface{} `json:"data"`
+	StatusCode  int         `json:"status_code"`
+	Message     string      `json:"message"`
+	contentType string
 }
 
 type HTTPResponseInterface interface {
@@ -16,6 +17,13 @@ type HTTPResponseInterface interface {
 }
 
 func (h *HTTPResponse) Send(w http.ResponseWriter) {
+
+	if h.contentType != "" {
+		w.Header().Set("Content-Type", h.contentType)
+	} else {
+		w.Header().Set("Content-Type", "application/json")
+	}
+
 	w.WriteHeader(h.StatusCode)
 
 	if h.StatusCode == http.StatusNoContent {

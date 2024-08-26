@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	database "github.com/harry-fruit/simple-go-rest-api/db"
+	"github.com/harry-fruit/simple-go-rest-api/internal/dtos"
 	"github.com/harry-fruit/simple-go-rest-api/internal/models"
 	"github.com/harry-fruit/simple-go-rest-api/internal/repositories"
 )
@@ -18,24 +19,20 @@ func NewUserService(db *database.SQLDatabase) *UserService {
 	}
 }
 
-func (us *UserService) Create(user *models.User) (*models.User, error) {
-	existentUser := us.userRepository.FindByLogin(user.Login)
+func (us *UserService) Create(userPayload *dtos.UserPayloadDTO) (*models.User, error) {
+	existentUser := us.userRepository.FindByLogin(userPayload.Login)
 
 	if existentUser != nil {
-		return nil, fmt.Errorf("login '%s' is in use", user.Login)
+		return nil, fmt.Errorf("login '%s' is in use", userPayload.Login)
 	}
 
-	err := us.userRepository.Create(user)
+	err := us.userRepository.Create(userPayload)
 
 	if err != nil {
 		return nil, err
 	}
 
-	newUser := &models.User{
-		Name:  user.Name,
-		Login: user.Login,
-	}
-
+	newUser := us.userRepository.FindByLogin(userPayload.Login)
 	return newUser, nil
 }
 
