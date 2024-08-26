@@ -1,12 +1,14 @@
 package services
 
 import (
+	"errors"
 	"fmt"
 
 	database "github.com/harry-fruit/simple-go-rest-api/db"
 	"github.com/harry-fruit/simple-go-rest-api/internal/dtos"
 	"github.com/harry-fruit/simple-go-rest-api/internal/models"
 	"github.com/harry-fruit/simple-go-rest-api/internal/repositories"
+	httpUtil "github.com/harry-fruit/simple-go-rest-api/internal/utils/http"
 )
 
 type UserService struct {
@@ -23,7 +25,7 @@ func (us *UserService) Create(userPayload *dtos.UserPayloadDTO) (*models.User, e
 	existentUser := us.userRepository.FindByLogin(userPayload.Login)
 
 	if existentUser != nil {
-		return nil, fmt.Errorf("login '%s' is in use", userPayload.Login)
+		return nil, errors.New(httpUtil.LoginInUse)
 	}
 
 	err := us.userRepository.Create(userPayload)

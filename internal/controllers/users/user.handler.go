@@ -9,7 +9,7 @@ import (
 	"github.com/gorilla/mux"
 	dto "github.com/harry-fruit/simple-go-rest-api/internal/dtos"
 	"github.com/harry-fruit/simple-go-rest-api/internal/types"
-	response "github.com/harry-fruit/simple-go-rest-api/internal/types/http"
+	httpUtil "github.com/harry-fruit/simple-go-rest-api/internal/utils/http"
 )
 
 func (uc *UserController) getHandlers() []types.Route {
@@ -27,9 +27,9 @@ func (uc *UserController) getHandlers() []types.Route {
 // @Tags Users
 // @Produce  json
 // @Param  id  path  int  true  "user's id"
-// @Success 200 {object} response.HTTPResponse{data=models.User} "user found"
-// @Failure 400 {object} response.HTTPResponse{data=nil} "bad request"
-// @Failure 404 {object} response.HTTPResponse{data=nil} "user not found"
+// @Success 200 {object} httpUtil.HTTPResponse{data=models.User} "user found"
+// @Failure 400 {object} httpUtil.HTTPResponse{data=nil} "bad request"
+// @Failure 404 {object} httpUtil.HTTPResponse{data=nil} "user not found"
 // @Router /users/{id} [get]
 func (uc *UserController) FindById(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -39,7 +39,7 @@ func (uc *UserController) FindById(w http.ResponseWriter, r *http.Request) {
 
 	//TODO: Refact -- Validate input
 	if err != nil {
-		httpResponse := &response.HTTPResponse{
+		httpResponse := &httpUtil.HTTPResponse{
 			StatusCode: http.StatusBadRequest,
 			Message:    "invalid id",
 			Data:       nil,
@@ -52,7 +52,7 @@ func (uc *UserController) FindById(w http.ResponseWriter, r *http.Request) {
 	user := uc.userService.FindById(id)
 
 	if user == nil {
-		httpResponse := &response.HTTPResponse{
+		httpResponse := &httpUtil.HTTPResponse{
 			StatusCode: http.StatusNotFound,
 			Message:    "user not found",
 			Data:       nil,
@@ -62,7 +62,7 @@ func (uc *UserController) FindById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httpResponse := &response.HTTPResponse{
+	httpResponse := &httpUtil.HTTPResponse{
 		StatusCode: http.StatusOK,
 		Message:    "user found",
 		Data:       user,
@@ -78,16 +78,17 @@ func (uc *UserController) FindById(w http.ResponseWriter, r *http.Request) {
 // @Accept  json
 // @Produce  json
 // @Param  user  body  dtos.UserPayloadDTO  true  "user payload"
-// @Success 201 {object} response.HTTPResponse{data=models.User} "user created"
-// @Failure 400 {object} response.HTTPResponse{data=nil} "bad request"
+// @Success 201 {object} httpUtil.HTTPResponse{data=models.User} "user created"
+// @Failure 400 {object} httpUtil.HTTPResponse{data=nil} "bad request"
 // @Router /users/ [post]
 func (uc *UserController) Create(w http.ResponseWriter, r *http.Request) {
 	var userPayload dto.UserPayloadDTO
 	decoder := json.NewDecoder(r.Body)
 	err := decoder.Decode(&userPayload)
 
+	//TODO: Refact -- Error Handler
 	if err != nil {
-		httpResponse := &response.HTTPResponse{
+		httpResponse := &httpUtil.HTTPResponse{
 			StatusCode: http.StatusBadRequest,
 			Message:    "bad request",
 			Data:       nil,
@@ -100,17 +101,11 @@ func (uc *UserController) Create(w http.ResponseWriter, r *http.Request) {
 	user, error := uc.userService.Create(&userPayload)
 
 	if error != nil {
-		httpResponse := &response.HTTPResponse{
-			StatusCode: http.StatusBadRequest,
-			Message:    "bad request",
-			Data:       nil,
-		}
-
-		httpResponse.Send(w)
+		httpUtil.SendError(w, error)
 		return
 	}
 
-	httpResponse := &response.HTTPResponse{
+	httpResponse := &httpUtil.HTTPResponse{
 		StatusCode: http.StatusCreated,
 		Message:    "user created",
 		Data:       user,
@@ -126,8 +121,8 @@ func (uc *UserController) Create(w http.ResponseWriter, r *http.Request) {
 // @Param  id  path  int  true  "user's id"
 // @Param  password  body  dtos.SetUserPasswordPayloadDTO  true  "user's password"
 // @Success 204 "user's password set"
-// @Failure 400 {object} response.HTTPResponse{data=nil} "bad request"
-// @Failure 404 {object} response.HTTPResponse{data=nil} "user not found"
+// @Failure 400 {object} httpUtil.HTTPResponse{data=nil} "bad request"
+// @Failure 404 {object} httpUtil.HTTPResponse{data=nil} "user not found"
 // @Router /users/{id}/set-password [post]
 func (uc *UserController) SetPassword(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -136,7 +131,7 @@ func (uc *UserController) SetPassword(w http.ResponseWriter, r *http.Request) {
 
 	//TODO: Refact -- Validate input
 	if err != nil {
-		httpResponse := &response.HTTPResponse{
+		httpResponse := &httpUtil.HTTPResponse{
 			StatusCode: http.StatusBadRequest,
 			Message:    "invalid id",
 			Data:       nil,
@@ -151,7 +146,7 @@ func (uc *UserController) SetPassword(w http.ResponseWriter, r *http.Request) {
 	err = decoder.Decode(&payload)
 
 	if err != nil {
-		httpResponse := &response.HTTPResponse{
+		httpResponse := &httpUtil.HTTPResponse{
 			StatusCode: http.StatusBadRequest,
 			Message:    "bad request",
 			Data:       nil,
@@ -164,7 +159,7 @@ func (uc *UserController) SetPassword(w http.ResponseWriter, r *http.Request) {
 	password, ok := payload["password"].(string)
 
 	if !ok {
-		httpResponse := &response.HTTPResponse{
+		httpResponse := &httpUtil.HTTPResponse{
 			StatusCode: http.StatusBadRequest,
 			Message:    "invalid or missing password",
 			Data:       nil,
@@ -177,7 +172,8 @@ func (uc *UserController) SetPassword(w http.ResponseWriter, r *http.Request) {
 	err = uc.userService.SetPassword(id, password)
 
 	if err != nil {
-		httpResponse := &response.HTTPResponse{
+		// TODO: Refact -- Handle error
+		httpResponse := &httpUtil.HTTPResponse{
 			StatusCode: http.StatusInternalServerError,
 			Message:    "internal server error",
 			Data:       nil,
@@ -187,7 +183,7 @@ func (uc *UserController) SetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	httpResponse := &response.HTTPResponse{
+	httpResponse := &httpUtil.HTTPResponse{
 		StatusCode: http.StatusNoContent,
 	}
 
@@ -201,9 +197,9 @@ func (uc *UserController) SetPassword(w http.ResponseWriter, r *http.Request) {
 // @Produce  json
 // @Param  id  path  int  true  "user's id"
 // @Param  user  body  dtos.UserPayloadDTO  true  "user payload"
-// @Success 201 {object} response.HTTPResponse{data=models.User} "user updated"
-// @Failure 400 {object} response.HTTPResponse{data=nil} "bad request"
-// @Failure 404 {object} response.HTTPResponse{data=nil} "user not found"
+// @Success 201 {object} httpUtil.HTTPResponse{data=models.User} "user updated"
+// @Failure 400 {object} httpUtil.HTTPResponse{data=nil} "bad request"
+// @Failure 404 {object} httpUtil.HTTPResponse{data=nil} "user not found"
 // @Router /users/{id} [patch]
 func (uc *UserController) Update(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -241,6 +237,7 @@ func (uc *UserController) Update(w http.ResponseWriter, r *http.Request) {
 	user, err := uc.userService.Update(payload)
 
 	if err != nil {
+		// TODO: Refact -- Handle error
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -254,8 +251,8 @@ func (uc *UserController) Update(w http.ResponseWriter, r *http.Request) {
 // @Produce  json
 // @Param  id  path  int  true  "user's id"
 // @Success 204 "user deleted"
-// @Failure 400 {object} response.HTTPResponse{data=nil} "bad request"
-// @Failure 404 {object} response.HTTPResponse{data=nil} "user not found"
+// @Failure 400 {object} httpUtil.HTTPResponse{data=nil} "bad request"
+// @Failure 404 {object} httpUtil.HTTPResponse{data=nil} "user not found"
 // @Router /users/{id} [delete]
 func (uc *UserController) Delete(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -264,7 +261,7 @@ func (uc *UserController) Delete(w http.ResponseWriter, r *http.Request) {
 
 	//TODO: Refact -- Validate input
 	if err != nil {
-		httpResponse := &response.HTTPResponse{
+		httpResponse := &httpUtil.HTTPResponse{
 			StatusCode: http.StatusBadRequest,
 			Message:    "invalid id",
 			Data:       nil,
@@ -277,7 +274,8 @@ func (uc *UserController) Delete(w http.ResponseWriter, r *http.Request) {
 	err = uc.userService.Delete(id)
 
 	if err != nil {
-		httpResponse := &response.HTTPResponse{
+		// TODO: Refact -- Handle error
+		httpResponse := &httpUtil.HTTPResponse{
 			StatusCode: http.StatusBadRequest,
 			Message:    "bad request",
 			Data:       nil,
