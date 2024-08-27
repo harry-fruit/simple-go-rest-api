@@ -15,11 +15,6 @@ SQLITE_DB_PATH=/db/db.db
 ## Migration
 
 
-# run: Run the application
-run:
-	@echo "Running: $(APP_UNIQUE_NAME)"
-	@cd $(CMD_PATH) && go run $(FILE_NAME)
-
 # build: Build the application
 build:
 	@echo "Building: $(APP_UNIQUE_NAME)"
@@ -32,7 +27,10 @@ install:
 	@echo "Dependencies installed"
 	@echo "Installing Database Migration Tool (Goose)..."
 	@go install github.com/pressly/goose/v3/cmd/goose@latest
-	@echo "Goose installed - You are ready to go! Execute 'make run' to start the application :D"
+	@echo "Goose installed!"
+	@echo "Installing Air..."
+	@go install github.com/air-verse/air@latest
+	@echo "Air installed!"
 	@echo "Built with" "$(C_RED)<3$(END_COLOR)" "by @harry-fruit"
 
 

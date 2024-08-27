@@ -3,3 +3,6 @@ db/*.db
 
 #Remove compiled files
 bin/*
+
+#Temporary files
+tmp/*
