@@ -2,34 +2,50 @@ package handlers
 
 import (
 	"net/http"
+	"strings"
 )
 
 const LoginInUse = "LOGIN_IN_USE"
+const BadPayload = "BAD_PAYLOAD"
 
-func SendError(w http.ResponseWriter, err error) {
-	statusCode, message := getStatusCodeAndMessage(err)
+type HTTPError struct {
+	StatusCode int
+	Message    string
+	ErrorType  string
+}
+
+func (he HTTPError) SendError(w http.ResponseWriter) {
 
 	httpResponse := &HTTPResponse{
-		StatusCode: statusCode,
-		Message:    message,
+		StatusCode: he.getStatusCode(),
+		Message:    he.getMessage(),
 		Data:       nil,
 	}
 
+	//Persist in logs
 	httpResponse.Send(w)
 }
 
-func getStatusCodeAndMessage(err error) (int, string) {
-	var statusCode int
-	var message string
+func (he HTTPError) getMessage() string {
 
-	switch err.Error() {
-	case LoginInUse:
-		statusCode = http.StatusConflict
-		message = "login in use"
-	default:
-		statusCode = http.StatusInternalServerError
-		message = "internal server error"
+	if he.Message != "" {
+		return he.Message
 	}
 
-	return statusCode, message
+	switch he.ErrorType {
+	case LoginInUse:
+		return "login already in use"
+	case BadPayload:
+		return "bad payload"
+	default:
+		return strings.ToLower(http.StatusText(he.getStatusCode()))
+	}
+
+}
+
+func (he HTTPError) getStatusCode() int {
+	if he.StatusCode != 0 {
+		return he.StatusCode
+	}
+	return http.StatusInternalServerError
 }

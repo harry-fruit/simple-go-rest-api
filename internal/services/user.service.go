@@ -1,8 +1,8 @@
 package services
 
 import (
-	"errors"
 	"fmt"
+	"net/http"
 
 	database "github.com/harry-fruit/simple-go-rest-api/db"
 	"github.com/harry-fruit/simple-go-rest-api/internal/dtos"
@@ -21,17 +21,20 @@ func NewUserService(db *database.SQLDatabase) *UserService {
 	}
 }
 
-func (us *UserService) Create(userPayload *dtos.UserPayloadDTO) (*models.User, error) {
+func (us *UserService) Create(userPayload *dtos.UserPayloadDTO) (*models.User, *httpUtil.HTTPError) {
 	existentUser := us.userRepository.FindByLogin(userPayload.Login)
 
 	if existentUser != nil {
-		return nil, errors.New(httpUtil.LoginInUse)
+		return nil, &httpUtil.HTTPError{
+			StatusCode: http.StatusBadRequest,
+			ErrorType:  httpUtil.LoginInUse,
+		}
 	}
 
 	err := us.userRepository.Create(userPayload)
 
 	if err != nil {
-		return nil, err
+		return nil, &httpUtil.HTTPError{}
 	}
 
 	newUser := us.userRepository.FindByLogin(userPayload.Login)

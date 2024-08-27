@@ -39,26 +39,23 @@ func (uc *UserController) FindById(w http.ResponseWriter, r *http.Request) {
 
 	//TODO: Refact -- Validate input
 	if err != nil {
-		httpResponse := &httpUtil.HTTPResponse{
+		httpError := &httpUtil.HTTPError{
 			StatusCode: http.StatusBadRequest,
-			Message:    "invalid id",
-			Data:       nil,
+			ErrorType:  httpUtil.BadPayload,
 		}
-
-		httpResponse.Send(w)
+		httpError.SendError(w)
 		return
 	}
 
 	user := uc.userService.FindById(id)
 
 	if user == nil {
-		httpResponse := &httpUtil.HTTPResponse{
-			StatusCode: http.StatusNotFound,
+		httpError := &httpUtil.HTTPError{
+			StatusCode: http.StatusBadRequest,
 			Message:    "user not found",
-			Data:       nil,
+			ErrorType:  httpUtil.BadPayload,
 		}
-
-		httpResponse.Send(w)
+		httpError.SendError(w)
 		return
 	}
 
@@ -68,7 +65,6 @@ func (uc *UserController) FindById(w http.ResponseWriter, r *http.Request) {
 		Data:       user,
 	}
 
-	// w.Header().Set("Content-Type", "application/json")
 	httpResponse.Send(w)
 }
 
@@ -88,20 +84,18 @@ func (uc *UserController) Create(w http.ResponseWriter, r *http.Request) {
 
 	//TODO: Refact -- Error Handler
 	if err != nil {
-		httpResponse := &httpUtil.HTTPResponse{
+		httpError := &httpUtil.HTTPError{
 			StatusCode: http.StatusBadRequest,
-			Message:    "bad request",
-			Data:       nil,
+			ErrorType:  httpUtil.BadPayload,
 		}
-
-		httpResponse.Send(w)
+		httpError.SendError(w)
 		return
 	}
 
-	user, error := uc.userService.Create(&userPayload)
+	user, httpError := uc.userService.Create(&userPayload)
 
-	if error != nil {
-		httpUtil.SendError(w, error)
+	if httpError != nil {
+		httpError.SendError(w)
 		return
 	}
 
