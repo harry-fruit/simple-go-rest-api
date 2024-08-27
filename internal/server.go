@@ -48,7 +48,7 @@ func (s *Server) setControllers() {
 		controller.SetRoutes(s.Router)
 	}
 
-	s.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
+	s.PathPrefix("/docs/").Handler(httpSwagger.WrapHandler)
 
 	fmt.Println("----- Controllers set -----")
 }
